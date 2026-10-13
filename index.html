@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#5a489c" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+<title>聊天式日记</title>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <h1>📔 我的日记</h1>
+    <button class="icon-btn" id="btnSettings" aria-label="设置">⚙️</button>
+  </header>
+
+  <main id="home" class="screen">
+    <p class="hint">今天是 <span id="todayLabel"></span>，记点什么吧</p>
+    <div class="grid">
+      <button class="card" data-screen="capture">
+        <span class="card-icon">✍️</span>
+        <span>继续记录</span>
+        <span class="card-sub">按清单逐项聊</span>
+      </button>
+      <button class="card" data-screen="quick">
+        <span class="card-icon">⚡</span>
+        <span>随手记一笔</span>
+        <span class="card-sub">不挑话题，想到啥记啥</span>
+      </button>
+      <button class="card" data-screen="topics">
+        <span class="card-icon">📋</span>
+        <span>待写项查看</span>
+        <span class="card-sub">看看清单还剩啥</span>
+      </button>
+      <button class="card" data-screen="archive">
+        <span class="card-icon">📥</span>
+        <span>整理归档</span>
+        <span class="card-sub">写进 Obsidian</span>
+      </button>
+      <button class="card" data-screen="story">
+        <span class="card-icon">📖</span>
+        <span>回忆故事</span>
+        <span class="card-sub">写一篇完整的故事</span>
+      </button>
+      <button class="card" data-screen="followup">
+        <span class="card-icon">🔖</span>
+        <span>待跟进事项</span>
+        <span class="card-sub">之前说过回头聊的</span>
+      </button>
+    </div>
+
+    <section class="todayList">
+      <h2>今天已经记的（<span id="todayCount">0</span>条）</h2>
+      <ul id="todayEntries"></ul>
+    </section>
+  </main>
+
+  <main id="capture" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <div id="captureBody"></div>
+  </main>
+
+  <main id="quick" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>随手记一笔</h2>
+    <textarea id="quickText" rows="6" placeholder="想到什么写什么……"></textarea>
+    <button class="primary" id="quickSave">保存</button>
+  </main>
+
+  <main id="topics" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>待写项清单</h2>
+    <ul id="topicList" class="plainlist"></ul>
+  </main>
+
+  <main id="archive" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>整理归档</h2>
+    <p class="hint">把还没写进 Obsidian 的内容打包，预览后可以手动调整文字，再发送。</p>
+    <div id="archiveList"></div>
+  </main>
+
+  <main id="story" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>回忆故事</h2>
+    <div id="storyWishlist"></div>
+    <label>标题</label>
+    <input id="storyTitle" type="text" placeholder="给这个故事起个标题" />
+    <label>内容</label>
+    <textarea id="storyText" rows="10" placeholder="讲讲这个故事吧……"></textarea>
+    <button class="primary" id="storySave">写完了，存入人生故事</button>
+  </main>
+
+  <main id="followup" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>待跟进事项</h2>
+    <ul id="followupList" class="plainlist"></ul>
+    <button class="secondary" id="followupAdd">+ 新增一条待跟进</button>
+  </main>
+
+  <main id="settings" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>设置</h2>
+
+    <label>Obsidian 仓库名（vault name）</label>
+    <input id="setVault" type="text" placeholder="例如 Obsidian Vault" />
+
+    <label>当前日记文件路径（每两月换一次）</label>
+    <input id="setDiaryFile" type="text" placeholder="日记/2026.9-10.md" />
+
+    <label>人生故事文件路径</label>
+    <input id="setStoryFile" type="text" placeholder="日记/人生故事.md" />
+
+    <button class="primary" id="settingsSave">保存设置</button>
+
+    <h3>待写项清单（可编辑）</h3>
+    <ul id="settingsTopics" class="plainlist editable"></ul>
+    <button class="secondary" id="topicAdd">+ 新增一项</button>
+
+    <p class="footnote">数据只存在本机浏览器里，不会上传到任何服务器，也不调用任何 AI 接口。</p>
+  </main>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+:root {
+  --purple: #5a489c;
+  --purple-light: #7c6dc4;
+  --bg: #f6f3fb;
+  --card-bg: #ffffff;
+  --text: #2b2440;
+  --sub: #847c9e;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 12px;
+  background: var(--purple);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar h1 { font-size: 18px; margin: 0; }
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  padding: 4px 8px;
+}
+
+.screen { padding: 16px; }
+.screen.hidden { display: none; }
+
+.hint { color: var(--sub); font-size: 14px; margin: 4px 0 16px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: none;
+  border-radius: 14px;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(90, 72, 156, 0.08);
+  font-size: 15px;
+  color: var(--text);
+}
+.card-icon { font-size: 28px; }
+.card-sub { font-size: 11px; color: var(--sub); }
+
+.back {
+  background: none;
+  border: none;
+  color: var(--purple);
+  font-size: 15px;
+  padding: 6px 0 14px;
+}
+
+h2 { font-size: 18px; margin: 4px 0 12px; }
+h3 { font-size: 15px; margin: 20px 0 8px; color: var(--sub); }
+
+label {
+  display: block;
+  font-size: 13px;
+  color: var(--sub);
+  margin: 14px 0 4px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  border: 1px solid #ddd6f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  background: white;
+  font-family: inherit;
+  resize: vertical;
+}
+
+button.primary {
+  width: 100%;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  margin-top: 16px;
+}
+button.secondary {
+  width: 100%;
+  background: white;
+  color: var(--purple);
+  border: 1px solid var(--purple-light);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.plainlist { list-style: none; padding: 0; margin: 0; }
+.plainlist li {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  box-shadow: 0 1px 4px rgba(90,72,156,0.06);
+}
+.plainlist li.done { opacity: 0.5; text-decoration: line-through; }
+
+.plainlist.editable li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plainlist.editable input { flex: 1; border: none; background: transparent; font-size: 14px; }
+.plainlist.editable button { background: none; border: none; color: #c0506a; font-size: 16px; }
+
+.todayList ul { list-style: none; padding: 0; }
+.todayList li {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.todayList .tag { color: var(--purple); font-size: 11px; margin-right: 6px; }
+
+.topicItem { display: flex; justify-content: space-between; align-items: center; }
+.topicItem button.answer {
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.archiveDay {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(90,72,156,0.06);
+}
+.archiveDay h3 { margin-top: 0; color: var(--text); }
+
+.footnote { color: var(--sub); font-size: 12px; margin-top: 24px; text-align: center; }
+
+.wishBtn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #ddd6f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.wishBtn.selected { border-color: var(--purple); background: #efeafb; }
+
+.progressDots { text-align: center; color: var(--sub); font-size: 13px; margin-bottom: 10px; }
