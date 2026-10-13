@@ -1,4 +1,4 @@
-const CACHE = 'diary-pwa-v1';
+const CACHE = 'diary-pwa-v2';
 const ASSETS = [
   './',
   './index.html',

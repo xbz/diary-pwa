@@ -368,6 +368,20 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('btnDiag').addEventListener('click', () => {
+    const out = document.getElementById('diagOutput');
+    const totalEntries = Object.values(DATA.entries).reduce((sum, arr) => sum + arr.length, 0);
+    const summary = {
+      当前入口: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+        ? '主屏幕图标（standalone）' : 'Safari 浏览器标签页',
+      总条数: totalEntries,
+      按日期统计: Object.fromEntries(Object.keys(DATA.entries).map((d) => [d, DATA.entries[d].length])),
+      原始JSON: DATA
+    };
+    out.textContent = JSON.stringify(summary, null, 2);
+    out.classList.remove('hidden');
+  });
+
   document.getElementById('settingsSave').addEventListener('click', () => {
     DATA.settings.vaultName = document.getElementById('setVault').value.trim();
     DATA.settings.diaryFile = document.getElementById('setDiaryFile').value.trim();
@@ -379,5 +393,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   }
 });
