@@ -284,7 +284,7 @@ function renderWishlist() {
     };
     const doneBtn = document.createElement('button');
     doneBtn.textContent = '✓ 已写完';
-    doneBtn.className = 'secondary smallBtn';
+    doneBtn.className = 'smallBtn';
     doneBtn.onclick = (e) => {
       e.stopPropagation();
       w.done = true;

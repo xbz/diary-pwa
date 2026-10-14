@@ -151,7 +151,8 @@ button.secondary {
 }
 .todayList .tag { color: var(--purple); font-size: 11px; margin-right: 6px; }
 
-.topicItem { display: flex; justify-content: space-between; align-items: center; }
+.topicItem { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.topicItem > span { flex: 1; min-width: 0; }
 .topicItem button.answer {
   background: var(--purple);
   color: white;
@@ -221,4 +222,14 @@ button.secondary {
 }
 
 .topicItem.selected { background: #efeafb; border-radius: 8px; }
-.smallBtn { padding: 4px 10px; font-size: 12px; width: auto; }
+.smallBtn {
+  width: auto;
+  padding: 4px 10px;
+  font-size: 12px;
+  margin: 0;
+  flex-shrink: 0;
+  background: white;
+  color: var(--purple);
+  border: 1px solid var(--purple-light);
+  border-radius: 8px;
+}
