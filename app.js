@@ -112,6 +112,7 @@ function renderScreen(id) {
   if (id === 'archive') renderArchive();
   if (id === 'story') renderStory();
   if (id === 'followup') renderFollowup();
+  if (id === 'history') renderHistory();
   if (id === 'settings') renderSettings();
 }
 
@@ -310,6 +311,37 @@ function renderFollowup() {
     const li = document.createElement('li');
     li.textContent = f.text;
     ul.appendChild(li);
+  });
+}
+
+// ===== 历史记录（不管归没归档，按日期查看全部内容）=====
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  container.innerHTML = '';
+  const dates = Object.keys(DATA.entries).sort().reverse();
+  if (dates.length === 0) {
+    container.innerHTML = '<p>还没有任何记录</p>';
+    return;
+  }
+  dates.forEach((date) => {
+    const entries = DATA.entries[date];
+    const unarchCount = entries.filter((e) => !e.archived).length;
+    const box = document.createElement('div');
+    box.className = 'archiveDay';
+    const text = composeDayText(entries);
+    box.innerHTML = `
+      <h3># ${formatDateHeading(date)}（共${entries.length}条${unarchCount ? '，' + unarchCount + '条未归档' : '，已全部归档'}）</h3>
+      <pre class="historyText">${escapeHtml(text)}</pre>
+      <button class="secondary" data-hcopy="${date}">📋 复制这一天</button>
+    `;
+    container.appendChild(box);
+  });
+  container.querySelectorAll('[data-hcopy]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const date = btn.getAttribute('data-hcopy');
+      const content = `# ${formatDateHeading(date)}\n\n${composeDayText(DATA.entries[date])}\n\n`;
+      copyToClipboard(content, e.currentTarget);
+    });
   });
 }
 

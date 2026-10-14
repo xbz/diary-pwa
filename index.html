@@ -52,6 +52,11 @@
         <span>待跟进事项</span>
         <span class="card-sub">之前说过回头聊的</span>
       </button>
+      <button class="card" data-screen="history">
+        <span class="card-icon">🗂️</span>
+        <span>历史记录</span>
+        <span class="card-sub">看看以前记过的内容</span>
+      </button>
     </div>
 
     <section class="todayList">
@@ -103,6 +108,13 @@
     <h2>待跟进事项</h2>
     <ul id="followupList" class="plainlist"></ul>
     <button class="secondary" id="followupAdd">+ 新增一条待跟进</button>
+  </main>
+
+  <main id="history" class="screen hidden">
+    <button class="back" data-back>← 返回</button>
+    <h2>历史记录</h2>
+    <p class="hint">按日期查看之前记过的所有内容，不管归没归档都在这里，可以随时复制。</p>
+    <div id="historyList"></div>
   </main>
 
   <main id="settings" class="screen hidden">

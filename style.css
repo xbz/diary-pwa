@@ -189,6 +189,16 @@ button.secondary {
 
 .progressDots { text-align: center; color: var(--sub); font-size: 13px; margin-bottom: 10px; }
 
+.historyText {
+  white-space: pre-wrap;
+  font-family: inherit;
+  background: var(--card-bg, #f5f3fb);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .confirmRow {
   display: flex;
   align-items: center;
