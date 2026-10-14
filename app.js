@@ -130,6 +130,21 @@ function renderHome() {
       escapeHtml(e.text);
     ul.appendChild(li);
   });
+
+  const archivedBox = document.getElementById('archivedHomeList');
+  archivedBox.innerHTML = '';
+  const dates = Object.keys(DATA.entries).sort().reverse();
+  let any = false;
+  dates.forEach((date) => {
+    const archived = DATA.entries[date].filter((e) => e.archived);
+    if (!archived.length) return;
+    any = true;
+    const box = document.createElement('div');
+    box.className = 'archiveDay';
+    box.innerHTML = `<h3># ${formatDateHeading(date)}</h3><pre class="historyText">${escapeHtml(composeDayText(archived))}</pre>`;
+    archivedBox.appendChild(box);
+  });
+  if (!any) archivedBox.innerHTML = '<p class="hint">还没有归档内容</p>';
 }
 
 function escapeHtml(s) {
@@ -198,15 +213,6 @@ function renderTopics() {
 }
 
 // ===== 整理归档 =====
-function allUnarchivedByDate() {
-  const result = {};
-  Object.keys(DATA.entries).forEach((date) => {
-    const unarch = DATA.entries[date].filter((e) => !e.archived);
-    if (unarch.length) result[date] = unarch;
-  });
-  return result;
-}
-
 function formatDateHeading(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
   return `${m}月${d}日`;
@@ -217,26 +223,24 @@ function composeDayText(entries) {
 }
 
 function renderArchive() {
-  const byDate = allUnarchivedByDate();
   const container = document.getElementById('archiveList');
   container.innerHTML = '';
-  const dates = Object.keys(byDate).sort();
+  const dates = Object.keys(DATA.entries).sort().reverse();
   if (dates.length === 0) {
-    container.innerHTML = '<p>没有待归档的内容啦，都整理过了 ✅</p>';
+    container.innerHTML = '<p>还没有任何记录</p>';
     return;
   }
   dates.forEach((date) => {
-    const entries = byDate[date];
+    const entries = DATA.entries[date];
+    const allArchived = entries.every((e) => e.archived);
     const box = document.createElement('div');
     box.className = 'archiveDay';
     const textId = 'archiveText_' + date;
-    const fullHeading = `# ${formatDateHeading(date)}\n\n`;
     box.innerHTML = `
-      <h3># ${formatDateHeading(date)}</h3>
+      <h3># ${formatDateHeading(date)} ${allArchived ? '<span class="tag">已归档</span>' : ''}</h3>
       <textarea id="${textId}" rows="6">${escapeHtml(composeDayText(entries))}</textarea>
-      <button class="secondary" data-copy="${date}">📋 复制（含标题），粘到 Obsidian 最保险</button>
-      <button class="primary" data-send="${date}">尝试跳转 Obsidian 自动写入</button>
-      <label class="confirmRow"><input type="checkbox" data-confirm="${date}" /> 我已确认内容写进 Obsidian 了，标记为已归档</label>
+      <button class="secondary" data-copy="${date}">📋 复制归档</button>
+      <button class="primary" data-confirm="${date}">✅ 确认归档</button>
     `;
     container.appendChild(box);
   });
@@ -248,24 +252,10 @@ function renderArchive() {
       copyToClipboard(content, e.currentTarget);
     });
   });
-  container.querySelectorAll('[data-send]').forEach((btn) => {
+  container.querySelectorAll('[data-confirm]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const date = btn.getAttribute('data-send');
-      const textarea = document.getElementById('archiveText_' + date);
-      const content = `# ${formatDateHeading(date)}\n\n${textarea.value.trim()}\n\n`;
-      const uri = buildObsidianAppendUri(DATA.settings.diaryFile, content);
-      tryOpenObsidian(uri);
-      // 注意：不在这里自动标记归档，必须用户手动勾选确认，避免数据静默丢失
-    });
-  });
-  container.querySelectorAll('[data-confirm]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-      if (!cb.checked) return;
-      const date = cb.getAttribute('data-confirm');
-      if (!confirm('确认这一天的内容已经手动确认写进 Obsidian 了吗？标记后会从待归档列表消失（但本地仍保留一份记录）。')) {
-        cb.checked = false;
-        return;
-      }
+      const date = btn.getAttribute('data-confirm');
+      if (!confirm(`确认 ${formatDateHeading(date)} 的内容已经复制并粘贴进 Obsidian 了吗？确认后会移动到首页的"已归档内容"里。`)) return;
       DATA.entries[date].forEach((e) => { e.archived = true; });
       saveData();
       renderArchive();

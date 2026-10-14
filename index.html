@@ -63,6 +63,11 @@
       <h2>今天已经记的（<span id="todayCount">0</span>条）</h2>
       <ul id="todayEntries"></ul>
     </section>
+
+    <section class="todayList">
+      <h2>已归档内容</h2>
+      <div id="archivedHomeList"></div>
+    </section>
   </main>
 
   <main id="capture" class="screen hidden">
@@ -87,7 +92,7 @@
   <main id="archive" class="screen hidden">
     <button class="back" data-back>← 返回</button>
     <h2>整理归档</h2>
-    <p class="hint">把还没写进 Obsidian 的内容打包，预览后可以手动调整文字。<b>推荐先点"复制"，粘贴进 Obsidian 最保险</b>；"自动跳转"是否成功取决于手机上有没有装 Obsidian App。确认真的写进去之后，再勾选"标记为已归档"。</p>
+    <p class="hint">按日期从新到旧显示你记过的所有内容。<b>先点"复制归档"粘贴进 Obsidian，确认粘贴成功后再点"确认归档"</b>，这一天的内容就会从这里移到首页的"已归档内容"里。</p>
     <div id="archiveList"></div>
   </main>
 
