@@ -14,10 +14,24 @@ const DEFAULT_TOPICS = [
   '看视频的新感悟'
 ];
 
+const DEFAULT_WISHLIST = [
+  { id: 'w1', topic: '嗅觉恢复实验', done: false },
+  { id: 'w2', topic: '以前联通的面试', done: false }
+];
+
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
-    try { return JSON.parse(raw); } catch (e) { /* fallthrough */ }
+    try {
+      const d = JSON.parse(raw);
+      if (!d.meta) d.meta = {};
+      if (!d.meta.seededWishlist) {
+        d.wishlist = (d.wishlist || []).concat(DEFAULT_WISHLIST);
+        d.meta.seededWishlist = true;
+      }
+      if (!d.followups) d.followups = [];
+      return d;
+    } catch (e) { /* fallthrough */ }
   }
   return {
     settings: {
@@ -26,13 +40,15 @@ function loadData() {
       storyFile: '日记/人生故事.md'
     },
     topics: DEFAULT_TOPICS.map((t, i) => ({ id: 't' + i, text: t })),
-    wishlist: [],
+    wishlist: DEFAULT_WISHLIST.slice(),
     followups: [],
-    entries: {} // { '2026-10-13': [ {id, topicId|null, text, createdAt, archived} ] }
+    entries: {}, // { '2026-10-13': [ {id, topicId|null, text, createdAt, archived} ] }
+    meta: { seededWishlist: true }
   };
 }
 
 let DATA = loadData();
+saveData();
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
@@ -241,28 +257,44 @@ function renderArchive() {
 let selectedWishId = null;
 function renderStory() {
   selectedWishId = null;
-  const wishBox = document.getElementById('storyWishlist');
-  wishBox.innerHTML = '';
-  if (DATA.wishlist.filter((w) => !w.done).length) {
-    const label = document.createElement('div');
-    label.className = 'hint';
-    label.textContent = '挑一个待写的故事，或者直接在下面写新标题：';
-    wishBox.appendChild(label);
-  }
-  DATA.wishlist.filter((w) => !w.done).forEach((w) => {
-    const btn = document.createElement('button');
-    btn.className = 'wishBtn';
-    btn.textContent = w.topic;
-    btn.onclick = () => {
-      selectedWishId = w.id;
-      document.getElementById('storyTitle').value = w.topic;
-      wishBox.querySelectorAll('.wishBtn').forEach((b) => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    };
-    wishBox.appendChild(btn);
-  });
   document.getElementById('storyTitle').value = '';
   document.getElementById('storyText').value = '';
+  renderWishlist();
+}
+
+function renderWishlist() {
+  const ul = document.getElementById('storyWishlist');
+  ul.innerHTML = '';
+  const pending = DATA.wishlist.filter((w) => !w.done);
+  if (pending.length === 0) {
+    ul.innerHTML = '<li>暂时没有待写的故事想法啦</li>';
+    return;
+  }
+  pending.forEach((w) => {
+    const li = document.createElement('li');
+    li.className = 'topicItem';
+    const span = document.createElement('span');
+    span.textContent = w.topic;
+    span.style.cursor = 'pointer';
+    span.onclick = () => {
+      selectedWishId = w.id;
+      document.getElementById('storyTitle').value = w.topic;
+      ul.querySelectorAll('li').forEach((x) => x.classList.remove('selected'));
+      li.classList.add('selected');
+    };
+    const doneBtn = document.createElement('button');
+    doneBtn.textContent = '✓ 已写完';
+    doneBtn.className = 'secondary smallBtn';
+    doneBtn.onclick = (e) => {
+      e.stopPropagation();
+      w.done = true;
+      saveData();
+      renderWishlist();
+    };
+    li.appendChild(span);
+    li.appendChild(doneBtn);
+    ul.appendChild(li);
+  });
 }
 
 function renderFollowup() {
@@ -381,6 +413,15 @@ window.addEventListener('DOMContentLoaded', () => {
     const text = document.getElementById('storyText').value.trim();
     if (!title && !text) return;
     copyToClipboard(`# ${title}\n\n${text}\n\n`, e.currentTarget);
+  });
+
+  document.getElementById('wishAdd').addEventListener('click', () => {
+    const text = prompt('新增一个想写的故事想法：');
+    if (text && text.trim()) {
+      DATA.wishlist.push({ id: uid(), topic: text.trim(), done: false });
+      saveData();
+      renderWishlist();
+    }
   });
 
   document.getElementById('followupAdd').addEventListener('click', () => {

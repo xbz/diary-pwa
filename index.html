@@ -82,20 +82,23 @@
   <main id="archive" class="screen hidden">
     <button class="back" data-back>← 返回</button>
     <h2>整理归档</h2>
-    <p class="hint">按日期从新到旧显示你记过的所有内容。<b>先点"复制归档"粘贴进 Obsidian，确认粘贴成功后再点"确认归档"</b>，这一天的内容就会从这里移到首页的"已归档内容"里。</p>
+    <p class="hint">按日期从新到旧显示你记过的所有内容。<b>先点"复制归档"粘贴进 Obsidian，确认粘贴成功后再点"确认归档"</b>，这一天的内容就会标记为已归档。</p>
     <div id="archiveList"></div>
   </main>
 
   <main id="story" class="screen hidden">
     <button class="back" data-back>← 返回</button>
     <h2>回忆故事</h2>
-    <div id="storyWishlist"></div>
     <label>标题</label>
     <input id="storyTitle" type="text" placeholder="给这个故事起个标题" />
     <label>内容</label>
     <textarea id="storyText" rows="10" placeholder="讲讲这个故事吧……"></textarea>
     <button class="primary" id="storySave">写完了，存入人生故事</button>
     <button class="secondary" id="storyCopy">📋 复制标题+内容</button>
+
+    <h3>待写的故事想法</h3>
+    <ul id="storyWishlist" class="plainlist"></ul>
+    <button class="secondary" id="wishAdd">+ 新增一个待写想法</button>
   </main>
 
   <main id="followup" class="screen hidden">

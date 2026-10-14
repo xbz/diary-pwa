@@ -219,3 +219,6 @@ button.secondary {
   max-height: 300px;
   overflow: auto;
 }
+
+.topicItem.selected { background: #efeafb; border-radius: 8px; }
+.smallBtn { padding: 4px 10px; font-size: 12px; width: auto; }
