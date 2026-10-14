@@ -14,9 +14,6 @@ const DEFAULT_TOPICS = [
   '看视频的新感悟'
 ];
 
-const DEFAULT_WISHLIST = [];
-const DEFAULT_FOLLOWUPS = [];
-
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
@@ -29,8 +26,8 @@ function loadData() {
       storyFile: '日记/人生故事.md'
     },
     topics: DEFAULT_TOPICS.map((t, i) => ({ id: 't' + i, text: t })),
-    wishlist: DEFAULT_WISHLIST.slice(),
-    followups: DEFAULT_FOLLOWUPS.slice(),
+    wishlist: [],
+    followups: [],
     entries: {} // { '2026-10-13': [ {id, topicId|null, text, createdAt, archived} ] }
   };
 }
@@ -58,7 +55,35 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-// ===== Obsidian URI =====
+// ===== 剪贴板（所有关键内容都能手动复制导出，防止丢失）=====
+function copyToClipboard(text, btnEl) {
+  const done = () => {
+    if (btnEl) {
+      const old = btnEl.textContent;
+      btnEl.textContent = '✅ 已复制';
+      setTimeout(() => { btnEl.textContent = old; }, 1500);
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动长按选中文字复制'); }
+  document.body.removeChild(ta);
+}
+
+// ===== Obsidian URI（仅作为"尝试跳转"的辅助手段，不保证一定成功）=====
 function buildObsidianAppendUri(filePath, content) {
   const vault = DATA.settings.vaultName || '';
   const params = new URLSearchParams();
@@ -69,7 +94,7 @@ function buildObsidianAppendUri(filePath, content) {
   return 'obsidian://new?' + params.toString();
 }
 
-function openObsidianUri(uri) {
+function tryOpenObsidian(uri) {
   window.location.href = uri;
 }
 
@@ -100,7 +125,7 @@ function renderHome() {
   list.slice().reverse().forEach((e) => {
     const li = document.createElement('li');
     const topic = DATA.topics.find((t) => t.id === e.topicId);
-    li.innerHTML = (topic ? `<span class="tag">${topic.text.slice(0, 8)}…</span>` : '<span class="tag">随手记</span>') +
+    li.innerHTML = (topic ? `<span class="tag">${escapeHtml(topic.text.slice(0, 8))}…</span>` : '<span class="tag">随手记</span>') +
       escapeHtml(e.text);
     ul.appendChild(li);
   });
@@ -111,7 +136,6 @@ function escapeHtml(s) {
 }
 
 // ===== 继续记录（按清单逐项）=====
-let captureIndex = 0;
 function unansweredTopicsToday() {
   const list = DATA.entries[todayStr()] || [];
   const answeredIds = new Set(list.map((e) => e.topicId).filter(Boolean));
@@ -119,49 +143,32 @@ function unansweredTopicsToday() {
 }
 
 function renderCapture() {
-  const remaining = unansweredTopicsToday();
-  const body = document.getElementById('captureBody');
-  if (remaining.length === 0) {
-    body.innerHTML = '<p>今天清单上的话题都聊过啦 🎉 要不去 <b>随手记一笔</b> 或者 <b>整理归档</b> 看看？</p>';
-    return;
-  }
-  const topic = remaining[0];
-  body.innerHTML = `
-    <div class="progressDots">还剩 ${remaining.length} 项</div>
-    <h2>${escapeHtml(topic.text)}</h2>
-    <textarea id="captureText" rows="6" placeholder="说点什么……"></textarea>
-    <button class="primary" id="captureSave">保存并下一题</button>
-    <button class="secondary" id="captureSkip">跳过这题</button>
-  `;
-  document.getElementById('captureSave').onclick = () => {
-    const text = document.getElementById('captureText').value.trim();
-    if (text) {
-      addEntry(topic.id, text);
-    }
-    renderCapture();
-  };
-  document.getElementById('captureSkip').onclick = () => {
-    // 临时把这题排到最后：记一个空占位不太好，直接跳过显示下一条
-    const rest = remaining.slice(1).concat([topic]);
-    renderCaptureWithOrder(rest);
-  };
+  renderCaptureWithOrder(unansweredTopicsToday());
 }
 
 function renderCaptureWithOrder(order) {
   const body = document.getElementById('captureBody');
-  if (order.length === 0) { renderCapture(); return; }
+  if (order.length === 0) {
+    body.innerHTML = '<p>今天清单上的话题都聊过啦 🎉 要不去 <b>随手记一笔</b> 或者 <b>整理归档</b> 看看？</p>';
+    return;
+  }
   const topic = order[0];
   body.innerHTML = `
     <div class="progressDots">还剩 ${order.length} 项</div>
     <h2>${escapeHtml(topic.text)}</h2>
     <textarea id="captureText" rows="6" placeholder="说点什么……"></textarea>
     <button class="primary" id="captureSave">保存并下一题</button>
+    <button class="secondary" id="captureCopy">📋 复制这段文字</button>
     <button class="secondary" id="captureSkip">跳过这题</button>
   `;
   document.getElementById('captureSave').onclick = () => {
     const text = document.getElementById('captureText').value.trim();
     if (text) addEntry(topic.id, text);
     renderCaptureWithOrder(order.slice(1));
+  };
+  document.getElementById('captureCopy').onclick = (e) => {
+    const text = document.getElementById('captureText').value.trim();
+    copyToClipboard(text, e.currentTarget);
   };
   document.getElementById('captureSkip').onclick = () => {
     renderCaptureWithOrder(order.slice(1).concat([topic]));
@@ -222,25 +229,45 @@ function renderArchive() {
     const box = document.createElement('div');
     box.className = 'archiveDay';
     const textId = 'archiveText_' + date;
+    const fullHeading = `# ${formatDateHeading(date)}\n\n`;
     box.innerHTML = `
       <h3># ${formatDateHeading(date)}</h3>
       <textarea id="${textId}" rows="6">${escapeHtml(composeDayText(entries))}</textarea>
-      <button class="primary" data-send="${date}">发送到 Obsidian</button>
+      <button class="secondary" data-copy="${date}">📋 复制（含标题），粘到 Obsidian 最保险</button>
+      <button class="primary" data-send="${date}">尝试跳转 Obsidian 自动写入</button>
+      <label class="confirmRow"><input type="checkbox" data-confirm="${date}" /> 我已确认内容写进 Obsidian 了，标记为已归档</label>
     `;
     container.appendChild(box);
+  });
+  container.querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const date = btn.getAttribute('data-copy');
+      const textarea = document.getElementById('archiveText_' + date);
+      const content = `# ${formatDateHeading(date)}\n\n${textarea.value.trim()}\n\n`;
+      copyToClipboard(content, e.currentTarget);
+    });
   });
   container.querySelectorAll('[data-send]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const date = btn.getAttribute('data-send');
       const textarea = document.getElementById('archiveText_' + date);
-      const heading = `# ${formatDateHeading(date)}\n\n`;
-      const content = heading + textarea.value.trim() + '\n\n';
+      const content = `# ${formatDateHeading(date)}\n\n${textarea.value.trim()}\n\n`;
       const uri = buildObsidianAppendUri(DATA.settings.diaryFile, content);
-      // 标记为已归档
+      tryOpenObsidian(uri);
+      // 注意：不在这里自动标记归档，必须用户手动勾选确认，避免数据静默丢失
+    });
+  });
+  container.querySelectorAll('[data-confirm]').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (!cb.checked) return;
+      const date = cb.getAttribute('data-confirm');
+      if (!confirm('确认这一天的内容已经手动确认写进 Obsidian 了吗？标记后会从待归档列表消失（但本地仍保留一份记录）。')) {
+        cb.checked = false;
+        return;
+      }
       DATA.entries[date].forEach((e) => { e.archived = true; });
       saveData();
-      openObsidianUri(uri);
-      setTimeout(() => renderArchive(), 300);
+      renderArchive();
     });
   });
 }
@@ -251,7 +278,7 @@ function renderStory() {
   selectedWishId = null;
   const wishBox = document.getElementById('storyWishlist');
   wishBox.innerHTML = '';
-  if (DATA.wishlist.length) {
+  if (DATA.wishlist.filter((w) => !w.done).length) {
     const label = document.createElement('div');
     label.className = 'hint';
     label.textContent = '挑一个待写的故事，或者直接在下面写新标题：';
@@ -334,20 +361,30 @@ window.addEventListener('DOMContentLoaded', () => {
       showScreen('home');
     }
   });
+  document.getElementById('quickCopy').addEventListener('click', (e) => {
+    const text = document.getElementById('quickText').value.trim();
+    if (text) copyToClipboard(text, e.currentTarget);
+  });
 
   document.getElementById('storySave').addEventListener('click', () => {
     const title = document.getElementById('storyTitle').value.trim();
     const text = document.getElementById('storyText').value.trim();
     if (!title || !text) { alert('标题和内容都写一下吧'); return; }
-    const content = `# ${title}\n\n${text}\n\n`;
-    const uri = buildObsidianAppendUri(DATA.settings.storyFile, content);
     if (selectedWishId) {
       const w = DATA.wishlist.find((x) => x.id === selectedWishId);
       if (w) w.done = true;
     }
     saveData();
-    openObsidianUri(uri);
+    const content = `# ${title}\n\n${text}\n\n`;
+    const uri = buildObsidianAppendUri(DATA.settings.storyFile, content);
+    tryOpenObsidian(uri);
     showScreen('home');
+  });
+  document.getElementById('storyCopy').addEventListener('click', (e) => {
+    const title = document.getElementById('storyTitle').value.trim();
+    const text = document.getElementById('storyText').value.trim();
+    if (!title && !text) return;
+    copyToClipboard(`# ${title}\n\n${text}\n\n`, e.currentTarget);
   });
 
   document.getElementById('followupAdd').addEventListener('click', () => {
@@ -375,11 +412,28 @@ window.addEventListener('DOMContentLoaded', () => {
       当前入口: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
         ? '主屏幕图标（standalone）' : 'Safari 浏览器标签页',
       总条数: totalEntries,
-      按日期统计: Object.fromEntries(Object.keys(DATA.entries).map((d) => [d, DATA.entries[d].length])),
-      原始JSON: DATA
+      按日期统计: Object.fromEntries(Object.keys(DATA.entries).map((d) => [d, DATA.entries[d].length]))
     };
     out.textContent = JSON.stringify(summary, null, 2);
     out.classList.remove('hidden');
+  });
+
+  document.getElementById('btnExportAll').addEventListener('click', (e) => {
+    copyToClipboard(JSON.stringify(DATA, null, 2), e.currentTarget);
+  });
+
+  document.getElementById('btnImportAll').addEventListener('click', () => {
+    const text = prompt('粘贴之前导出的完整 JSON 数据（会整体覆盖当前本地数据）：');
+    if (!text) return;
+    try {
+      const parsed = JSON.parse(text);
+      DATA = parsed;
+      saveData();
+      alert('导入成功');
+      showScreen('home');
+    } catch (err) {
+      alert('解析失败，确认粘贴的是完整 JSON');
+    }
   });
 
   document.getElementById('settingsSave').addEventListener('click', () => {
@@ -391,13 +445,13 @@ window.addEventListener('DOMContentLoaded', () => {
     showScreen('home');
   });
 
+  // 不再使用 Service Worker，避免 iOS 上的缓存更新问题；并清理掉之前可能注册过的旧 SW
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
     });
+    if (window.caches) {
+      caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+    }
   }
 });

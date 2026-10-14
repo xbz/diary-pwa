@@ -70,6 +70,7 @@
     <h2>随手记一笔</h2>
     <textarea id="quickText" rows="6" placeholder="想到什么写什么……"></textarea>
     <button class="primary" id="quickSave">保存</button>
+    <button class="secondary" id="quickCopy">📋 复制这段文字</button>
   </main>
 
   <main id="topics" class="screen hidden">
@@ -81,7 +82,7 @@
   <main id="archive" class="screen hidden">
     <button class="back" data-back>← 返回</button>
     <h2>整理归档</h2>
-    <p class="hint">把还没写进 Obsidian 的内容打包，预览后可以手动调整文字，再发送。</p>
+    <p class="hint">把还没写进 Obsidian 的内容打包，预览后可以手动调整文字。<b>推荐先点"复制"，粘贴进 Obsidian 最保险</b>；"自动跳转"是否成功取决于手机上有没有装 Obsidian App。确认真的写进去之后，再勾选"标记为已归档"。</p>
     <div id="archiveList"></div>
   </main>
 
@@ -94,6 +95,7 @@
     <label>内容</label>
     <textarea id="storyText" rows="10" placeholder="讲讲这个故事吧……"></textarea>
     <button class="primary" id="storySave">写完了，存入人生故事</button>
+    <button class="secondary" id="storyCopy">📋 复制标题+内容</button>
   </main>
 
   <main id="followup" class="screen hidden">
@@ -123,6 +125,11 @@
     <button class="secondary" id="topicAdd">+ 新增一项</button>
 
     <p class="footnote">数据只存在本机浏览器里，不会上传到任何服务器，也不调用任何 AI 接口。</p>
+
+    <h3>数据备份 / 迁移</h3>
+    <p class="hint">导出是把所有数据（清单、待办、今天记的内容等）整体复制成一段文字，可以存到备忘录或发给自己；导入则是整体还原，换设备或者清理缓存后能找回。</p>
+    <button class="secondary" id="btnExportAll">📋 导出全部数据（复制）</button>
+    <button class="secondary" id="btnImportAll">📥 导入数据（粘贴还原）</button>
 
     <h3>数据诊断</h3>
     <p class="hint">当前这个"浏览环境"里一共存了多少条记录。如果你分别用「Safari 标签页」和「主屏幕图标」打开过，这两边的数字可能不一样——这是 iOS 的存储隔离机制，不是数据丢了，换成固定一个入口使用即可。</p>
