@@ -119,32 +119,6 @@ function renderScreen(id) {
 // ===== 首页 =====
 function renderHome() {
   document.getElementById('todayLabel').textContent = todayLabel();
-  const list = DATA.entries[todayStr()] || [];
-  document.getElementById('todayCount').textContent = list.length;
-  const ul = document.getElementById('todayEntries');
-  ul.innerHTML = '';
-  list.slice().reverse().forEach((e) => {
-    const li = document.createElement('li');
-    const topic = DATA.topics.find((t) => t.id === e.topicId);
-    li.innerHTML = (topic ? `<span class="tag">${escapeHtml(topic.text.slice(0, 8))}…</span>` : '<span class="tag">随手记</span>') +
-      escapeHtml(e.text);
-    ul.appendChild(li);
-  });
-
-  const archivedBox = document.getElementById('archivedHomeList');
-  archivedBox.innerHTML = '';
-  const dates = Object.keys(DATA.entries).sort().reverse();
-  let any = false;
-  dates.forEach((date) => {
-    const archived = DATA.entries[date].filter((e) => e.archived);
-    if (!archived.length) return;
-    any = true;
-    const box = document.createElement('div');
-    box.className = 'archiveDay';
-    box.innerHTML = `<h3># ${formatDateHeading(date)}</h3><pre class="historyText">${escapeHtml(composeDayText(archived))}</pre>`;
-    archivedBox.appendChild(box);
-  });
-  if (!any) archivedBox.innerHTML = '<p class="hint">还没有归档内容</p>';
 }
 
 function escapeHtml(s) {
